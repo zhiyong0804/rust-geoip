@@ -12,7 +12,6 @@ use std::error::Error;
 use std::ffi;
 use std::fmt::{self, Debug};
 use std::net::{Ipv4Addr, Ipv6Addr};
-use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::str::Utf8Error;
 use std::sync::Mutex;
@@ -280,9 +279,14 @@ impl Error for ReadInfoError {
 
 impl GeoIp {
     pub fn open(path: &Path, options: Options) -> Result<GeoIp, OpenPathError> {
+		let mut pathstr_value : &str = "";
+		match path.to_str() {
+			Some(v) => {pathstr_value = v ;},
+			None => {"get str failed";},
+		};
         let db = unsafe {
             geoip_sys::GeoIP_open(
-                ffi::CString::new(path.as_os_str().as_bytes())?.as_ptr(),
+				ffi::CString::new(pathstr_value.as_bytes())?.as_ptr(),
                 options as c_int,
             )
         };
